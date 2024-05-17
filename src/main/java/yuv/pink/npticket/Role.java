@@ -1,6 +1,6 @@
 package yuv.pink.npticket;
 
-class Role {
+public class Role {
     public int id;
     public String domain;
 

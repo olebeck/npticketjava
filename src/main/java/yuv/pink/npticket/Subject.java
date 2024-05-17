@@ -1,18 +1,16 @@
 package yuv.pink.npticket;
 
-import java.time.Instant;
-
-class Subject {
+public class Subject {
     public long accountID;
     public String onlineID;
     public byte[] region;
     public String domain;
     public String serviceID;
-    public Instant dob;
+    public NPDate dob;
     public int status;
     public long duration;
 
-    Subject(long accountID, String onlineID, byte[] region, String domain, String serviceID, Instant dob, int status, long duration) {
+    Subject(long accountID, String onlineID, byte[] region, String domain, String serviceID, NPDate dob, int status, long duration) {
         this.accountID = accountID;
         this.onlineID = onlineID;
         this.region = region;

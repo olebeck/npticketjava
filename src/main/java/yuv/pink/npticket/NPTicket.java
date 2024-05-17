@@ -3,10 +3,6 @@ package yuv.pink.npticket;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +15,8 @@ public class NPTicket {
     public boolean jumboPacket;
     public byte[] serial;
     public int issuerID;
-    public Instant issuedDate;
-    public Instant notOnOrAfterDate;
+    public long issuedDate;
+    public long notOnOrAfterDate;
     public Subject subject;
     public byte[] cookie;
     public List<Entitlement> entitlements;
@@ -31,7 +27,7 @@ public class NPTicket {
     public boolean isVerified;
 
     public boolean isExpired() {
-        return notOnOrAfterDate.isBefore(Instant.now());
+        return notOnOrAfterDate < System.currentTimeMillis();
     }
 
     public void writeTo(OutputStream ticketBody, Cipher cipher) throws IOException {
@@ -62,11 +58,11 @@ public class NPTicket {
 
         // IssuedDate
         writeTag(dataOutputStream, 7, 8);
-        dataOutputStream.writeLong(issuedDate.toEpochMilli());
+        dataOutputStream.writeLong(issuedDate);
 
         // NotOnOrAfterDate
         writeTag(dataOutputStream, 7, 8);
-        dataOutputStream.writeLong(notOnOrAfterDate.toEpochMilli());
+        dataOutputStream.writeLong(notOnOrAfterDate);
 
         // AccountID
         writeTag(dataOutputStream, 2, 8);
@@ -93,7 +89,7 @@ public class NPTicket {
         // DateOfBirth
         if(version >= 768) {
             writeTag(dataOutputStream, 0x3011, 4);
-            writeNPDate(dataOutputStream, this.subject.dob);
+            this.subject.dob.write(dataOutputStream);
         }
 
         // Status
@@ -119,23 +115,23 @@ public class NPTicket {
             if(this.entitlements != null) {
                 for (Entitlement entitlement : this.entitlements) {
                     String eid = entitlement.entitlementID.substring(entitlement.entitlementID.lastIndexOf("-") + 1);
-                    boolean haveExpiry = entitlement.expiredDate != null;
+                    boolean haveExpiry = entitlement.expiredDate != 0;
 
                     byte header = 0;
                     if (entitlement.type == 1) {
-                        header &= ~(byte) 64;
+                        header |= 1 << 6;
                     }
                     if (haveExpiry) {
-                        header &= ~(byte) 32;
+                        header |= 1 << 5;
                     }
                     header |= (byte) (eid.length() & 31);
                     entitlementsBodyData.write(header);
 
                     writeString(entitlementsBodyData, eid, eid.length());
-                    entitlementsBodyData.writeLong(entitlement.createdDate.toEpochMilli());
+                    entitlementsBodyData.writeLong(entitlement.createdDate);
 
                     if (haveExpiry) {
-                        entitlementsBodyData.writeLong(entitlement.expiredDate.toEpochMilli());
+                        entitlementsBodyData.writeLong(entitlement.expiredDate);
                     }
 
                     if (entitlement.type == 1) {
@@ -258,11 +254,11 @@ public class NPTicket {
 
         // IssuedDate
         checkTag(dataInputStream, 0x7, 8);
-        issuedDate = Instant.ofEpochMilli(dataInputStream.readLong());
+        issuedDate = dataInputStream.readLong();
 
         // NotOnOrAfterDate
         checkTag(dataInputStream, 0x7, 8);
-        notOnOrAfterDate = Instant.ofEpochMilli(dataInputStream.readLong());
+        notOnOrAfterDate = dataInputStream.readLong();
 
         // AccountID
         checkTag(dataInputStream, 0x2, 8);
@@ -295,13 +291,10 @@ public class NPTicket {
         String serviceID = new String(serviceIDBytes, StandardCharsets.UTF_8).trim();
 
         // Dob
-        Instant dob = null;
+        NPDate dob = null;
         if (version >= 768) {
             checkTag(dataInputStream, 0x3011, 4);
-            short year = dataInputStream.readShort();
-            byte month = dataInputStream.readByte();
-            byte day = dataInputStream.readByte();
-            dob = LocalDateTime.of(year, month, day, 0, 0, 0).toInstant(ZoneOffset.UTC);
+            dob = NPDate.read(dataInputStream);
         }
 
         // Status
@@ -362,13 +355,11 @@ public class NPTicket {
                 DataInputStream din = new DataInputStream(new ByteArrayInputStream(entitlementsData, pe, entitlementsData.length-pe));
 
 
-                long createdDateMillis = din.readLong();
+                entitlement.createdDate = din.readLong();
                 pe += 8;
-                entitlement.createdDate = Instant.ofEpochMilli(createdDateMillis);
                 if ((header & 32) != 0) {
-                    long expiredDateMillis = din.readLong();
+                    entitlement.expiredDate = din.readLong();
                     pe += 8;
-                    entitlement.expiredDate = Instant.ofEpochMilli(expiredDateMillis);
                 }
 
                 if ((header & 64) != 0) {
@@ -387,7 +378,7 @@ public class NPTicket {
         }
 
         // Roles
-        if (version > 512) {
+        if (version >= 512) {
             int rolesSize = checkTag(dataInputStream, 0x0, -1);
             int pp = 0;
             while (pp < rolesSize) {
@@ -422,7 +413,7 @@ public class NPTicket {
 
         try {
             checkTag(dataInputStream, 0x3012, 200);
-            int idk = dataInputStream.readInt();
+            dataInputStream.readInt();
             int cipherID = dataInputStream.readInt();
             if(verify && cipherID != cipher.id) {
                 throw new BrokenTicketException("wrong cipherID");
@@ -466,13 +457,6 @@ public class NPTicket {
             throw new BrokenTicketException("unexpected size");
         }
         return size;
-    }
-
-    private void writeNPDate(DataOutputStream dataOutputStream, Instant date) throws IOException {
-        OffsetDateTime dt = date.atOffset(ZoneOffset.UTC);
-        dataOutputStream.writeShort(dt.getYear());
-        dataOutputStream.writeByte(dt.getMonthValue());
-        dataOutputStream.writeByte(dt.getDayOfMonth());
     }
 }
 
