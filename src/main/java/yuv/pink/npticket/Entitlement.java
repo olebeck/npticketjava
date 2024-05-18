@@ -8,6 +8,10 @@ public class Entitlement {
     public int remainingCount;
     public int consumedCount;
 
+    public Entitlement() {
+
+    };
+    
     public Entitlement(String entitlementID, long createdDate, long expiredDate, int type, int remainingCount, int consumedCount) {
         this.entitlementID = entitlementID;
         this.createdDate = createdDate;
