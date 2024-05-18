@@ -5,23 +5,23 @@ import java.security.interfaces.ECPublicKey;
 
 public class Cipher {
     public final int id;
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
+    public PublicKey publicKey;
+    public PrivateKey privateKey;
 
-    private PublicKey RSApublicKey;
-    private PrivateKey RSAprivateKey;
+    public PublicKey RSApublicKey;
+    public PrivateKey RSAprivateKey;
 
     Cipher(int id) {
         this.id = id;
     }
 
-    Cipher(int id, PrivateKey privateKey, PrivateKey RSAprivateKey) {
+    public Cipher(int id, PrivateKey privateKey, PrivateKey RSAprivateKey) {
         this.id = id;
         this.privateKey = privateKey;
         this.RSAprivateKey = RSAprivateKey;
     }
 
-    Cipher(int id, PublicKey publicKey, PublicKey RSApublicKey) {
+    public Cipher(int id, PublicKey publicKey, PublicKey RSApublicKey) {
         this.id = id;
         this.publicKey = publicKey;
         this.RSApublicKey = RSApublicKey;
