@@ -11,17 +11,17 @@ public class Cipher {
     private PublicKey RSApublicKey;
     private PrivateKey RSAprivateKey;
 
-    Cipher(int id) {
+    public Cipher(int id) {
         this.id = id;
     }
 
-    Cipher(int id, PrivateKey privateKey, PrivateKey RSAprivateKey) {
+    public Cipher(int id, PrivateKey privateKey, PrivateKey RSAprivateKey) {
         this.id = id;
         this.privateKey = privateKey;
         this.RSAprivateKey = RSAprivateKey;
     }
 
-    Cipher(int id, PublicKey publicKey, PublicKey RSApublicKey) {
+    public Cipher(int id, PublicKey publicKey, PublicKey RSApublicKey) {
         this.id = id;
         this.publicKey = publicKey;
         this.RSApublicKey = RSApublicKey;
