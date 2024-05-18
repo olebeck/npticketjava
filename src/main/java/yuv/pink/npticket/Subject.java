@@ -10,7 +10,7 @@ public class Subject {
     public int status;
     public long duration;
 
-    Subject(long accountID, String onlineID, byte[] region, String domain, String serviceID, NPDate dob, int status, long duration) {
+    public Subject(long accountID, String onlineID, byte[] region, String domain, String serviceID, NPDate dob, int status, long duration) {
         this.accountID = accountID;
         this.onlineID = onlineID;
         this.region = region;
