@@ -11,7 +11,7 @@ public class Cipher {
     public PublicKey RSApublicKey;
     public PrivateKey RSAprivateKey;
 
-    Cipher(int id) {
+    public Cipher(int id) {
         this.id = id;
     }
 
