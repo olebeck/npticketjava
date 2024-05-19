@@ -2,7 +2,6 @@ package yuv.pink.npticket;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -268,7 +267,7 @@ public class NPTicket {
         checkTag(dataInputStream, 0x4, 32);
         byte[] onlineIDBytes = new byte[32];
         dataInputStream.readFully(onlineIDBytes);
-        String onlineID = new String(onlineIDBytes, StandardCharsets.UTF_8).trim();
+        String onlineID = new String(onlineIDBytes, "UTF-8").trim();
 
         // Region
         checkTag(dataInputStream, 0x8, 4);
@@ -281,14 +280,14 @@ public class NPTicket {
             checkTag(dataInputStream, 0x4, 4);
             byte[] domainBytes = new byte[4];
             dataInputStream.readFully(domainBytes);
-            domain = new String(domainBytes, StandardCharsets.UTF_8).trim();
+            domain = new String(domainBytes, "UTF-8").trim();
         }
 
         // ServiceID
         checkTag(dataInputStream, 0x8, 24);
         byte[] serviceIDBytes = new byte[24];
         dataInputStream.readFully(serviceIDBytes);
-        String serviceID = new String(serviceIDBytes, StandardCharsets.UTF_8).trim();
+        String serviceID = new String(serviceIDBytes, "UTF-8").trim();
 
         // Dob
         NPDate dob = null;
@@ -345,7 +344,7 @@ public class NPTicket {
 
                 byte[] eidBytes = new byte[eidSize];
                 System.arraycopy(entitlementsData, pe, eidBytes, 0, eidSize);
-                String entitlementID = new String(eidBytes, StandardCharsets.UTF_8);
+                String entitlementID = new String(eidBytes, "UTF-8");
                 if (eidSize > 8) {
                     entitlement.entitlementID = entitlementID;
                 } else {
@@ -391,7 +390,7 @@ public class NPTicket {
                 byte[] domainBytes = new byte[domainLength];
                 dataInputStream.readFully(domainBytes);
                 pp += domainLength;
-                String roleDomain = new String(domainBytes, StandardCharsets.UTF_8).trim();
+                String roleDomain = new String(domainBytes, "UTF-8").trim();
                 Role role = new Role(id, roleDomain);
                 this.roles.add(role);
             }
@@ -402,7 +401,7 @@ public class NPTicket {
             checkTag(dataInputStream, 0x8, 8);
             byte[] platformBytes = new byte[8];
             dataInputStream.readFully(platformBytes);
-            platform = new String(platformBytes, StandardCharsets.UTF_8).trim();
+            platform = new String(platformBytes, "UTF-8").trim();
         }
 
         // ConsoleID
